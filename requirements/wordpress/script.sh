@@ -1,4 +1,5 @@
 #!/bin/bash
+
 sleep 10  # Wait for MariaDB to be ready
 cd /var/www/html
 curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
