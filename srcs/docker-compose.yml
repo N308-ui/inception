@@ -2,22 +2,15 @@ version: "3.8"
 
 services:
 
-
-
-
-
-
   nginx:
     build: ./requirements/nginx/.
     container_name: nginx
     ports:
-      - "80:80"
+      - 80:80
     volumes:
       - ./web:/var/www/html
     networks:
       inception:
-
-
     
   wordpress:
     build:
@@ -28,8 +21,8 @@ services:
       - ./web:/var/www/html
     networks:
       inception:
-    
-
+    env_file:
+      - .env
 
   mariadb:
     build:
@@ -38,6 +31,8 @@ services:
     container_name: mariadb
     networks:
       inception:
+    env_file:
+      - .env
     # volumes:
     #   - ./database:/var/lib/mysql
 
