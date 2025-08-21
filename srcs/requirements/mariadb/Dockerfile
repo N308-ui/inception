@@ -1,10 +1,19 @@
-FROM debian:bookworm
+FROM debian:bookworm-slim
 
-RUN apt update && apt upgrade && apt install -y mariadb-server
+RUN apt update && apt upgrade -y && \
+    apt install -y mariadb-server && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/*
 
-COPY 50-server.cnf /etc/mysql/mariadb.conf.d/.
-COPY init.sql /etc/mysql/init.sql
-# RUN mkdir /run/mysqld
-RUN mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld
+RUN mkdir -p /run/mysqld && \
+    chown -R mysql:mysql /run/mysqld && \
+    chown -R mysql:mysql /var/lib/mysql
 
-CMD [ "mysqld" ]
+COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/
+COPY tools/docker-entrypoint.sh /usr/local/bin/
+
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+EXPOSE 3306
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

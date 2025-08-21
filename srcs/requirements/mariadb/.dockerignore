@@ -1,0 +1,5 @@
+# srcs/requirements/mariadb/.dockerignore
+.git
+*.tmp
+*.log
+.DS_Store

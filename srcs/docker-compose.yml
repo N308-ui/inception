@@ -1,3 +1,4 @@
+# Update srcs/docker-compose.yml
 version: "3.8"
 
 services:
@@ -6,23 +7,43 @@ services:
     build: ./requirements/nginx/.
     container_name: nginx
     ports:
-      - 80:80
+      - "443:443"
     volumes:
-      - ./web:/var/www/html
+      - web_volume:/var/www/html
+      - ./requirements/nginx/conf:/etc/nginx/conf.d
     networks:
       inception:
-    
+    restart: unless-stopped
+    depends_on:
+      - wordpress
+    env_file:
+      - .env
+
   wordpress:
     build:
       context: ./requirements/wordpress/.
       dockerfile: Dockerfile
     container_name: wp-php
     volumes:
-      - ./web:/var/www/html
+      - web_volume:/var/www/html
     networks:
       inception:
     env_file:
       - .env
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - DOMAIN_NAME=${DOMAIN_NAME}
+      - WP_ADMIN_USER=${WP_ADMIN_USER}
+      - WP_ADMIN_PASSWORD=${WP_ADMIN_PASSWORD}
+      - WP_ADMIN_EMAIL=${WP_ADMIN_EMAIL}
+      - WP_USER=${WP_USER}
+      - WP_USER_PASSWORD=${WP_USER_PASSWORD}
+      - WP_USER_EMAIL=${WP_USER_EMAIL}
+    restart: unless-stopped
+    depends_on:
+      - mariadb
 
   mariadb:
     build:
@@ -31,10 +52,36 @@ services:
     container_name: mariadb
     networks:
       inception:
-    env_file:
-      - .env
-    # volumes:
-    #   - ./database:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - db_volume:/var/lib/mysql
+      - ./requirements/mariadb/conf:/etc/mysql/conf.d
+    restart: unless-stopped
+
+volumes:
+  web_volume:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/g0dr1c/data/web
+  db_volume:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/g0dr1c/data/db
 
 networks:
   inception:
+    driver: bridge
+
+secrets:
+  db_root_password:
+    file: ./secrets/db_root_password.txt
+  db_password:
+    file: ./secrets/db_password.txt
