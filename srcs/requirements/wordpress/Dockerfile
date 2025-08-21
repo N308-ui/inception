@@ -17,11 +17,12 @@ RUN apt-get update && apt-get upgrade -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Configure PHP-FPM
-RUN sed -i 's/listen = .*/listen = 9000/' /etc/php/8.2/fpm/pool.d/www.conf && \
+# Configure PHP-FPM to listen on port 9000
+RUN sed -i 's/^listen = .*/listen = 9000/' /etc/php/8.2/fpm/pool.d/www.conf && \
     sed -i 's/;listen.owner = www-data/listen.owner = www-data/' /etc/php/8.2/fpm/pool.d/www.conf && \
     sed -i 's/;listen.group = www-data/listen.group = www-data/' /etc/php/8.2/fpm/pool.d/www.conf && \
-    sed -i 's/;listen.mode = 0660/listen.mode = 0660/' /etc/php/8.2/fpm/pool.d/www.conf
+    sed -i 's/;listen.mode = 0660/listen.mode = 0660/' /etc/php/8.2/fpm/pool.d/www.conf && \
+    sed -i 's/;daemonize = yes/daemonize = no/' /etc/php/8.2/fpm/php-fpm.conf
 
 # Configure msmtp as sendmail replacement
 RUN ln -sf /usr/bin/msmtp /usr/sbin/sendmail && \
@@ -38,8 +39,9 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy and prepare the script
+# Copy scripts
 COPY ./tools/script.sh /usr/local/bin/
+COPY ./tools/check-db.php /usr/local/bin/
 RUN chmod +x /usr/local/bin/script.sh
 
 # Set proper permissions
