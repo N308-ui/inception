@@ -1,18 +1,16 @@
 FROM debian:bookworm
 
-RUN apt update && apt upgrade -y && apt install -y \
-    nginx openssl
+RUN apt update && apt upgrade && apt install -y nginx openssl
 
-RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \ 
-    -keyout /etc/ssl/private/g0dr1c.key \
-    -out /etc/ssl/certs/g0dr1c.crt \
-    -subj="/C=MA/ST=benguerir/L=benguerir/O=1337 School/OU=g0dr1c/CN=g0dr1c.42.fr"
+RUN cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak && \
+    rm -rf /etc/nginx/sites-available/default
 
-COPY ./tools/certs.sh /tmp/certs.sh
-COPY ./conf/default /etc/nginx/sites-available/default
+COPY default /etc/nginx/sites-available/
+COPY setup.sh .
 
-RUN chmod +x /tmp/certs.sh
+RUN chmod +x setup.sh
 
+EXPOSE 80
 EXPOSE 443
 
-ENTRYPOINT ["/tmp/certs.sh"]
+CMD [ "./setup.sh" ]

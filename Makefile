@@ -1,13 +1,14 @@
 all: up
 
 up:
-	docker-compose -f ./srcs/docker-compose.yml up --build  -d
+	docker compose -f srcs/docker-compose.yaml up --build
+
 down:
-	docker-compose -f ./srcs/docker-compose.yml down -v 
+	docker compose -f srcs/docker-compose.yaml down -v
 
 fclean: down
 	docker system prune -a -f
 
-re: clean all
+re: fclean all
 
 .PHONY: all up down clean re
